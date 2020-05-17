@@ -1,0 +1,25 @@
+<!doctype html> <html ng-app="chile"> <head> <!-- Basic --> <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> <meta charset="UTF-8"> <title ng-controller="PageTitleCtrl as Page">{{ Page.getTitle() }}</title> <meta name="keywords" content=""> <meta name="description" content=""> <!-- Mobile Metas --> <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"> <!-- Web Fonts  --> <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,600,600i,700,700i,800,800i" rel="stylesheet"> --> <!-- <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet"> --> <!-- Place favicon.ico and apple-touch-icon.png in the root directory --> <!-- Added CSS File For Font-Family in our server--> <link rel="stylesheet" href="styles/font-family.css"> <link rel="stylesheet" href="styles/vendor.b8b4d86c.css"> <link rel="stylesheet" href="styles/style.043db654.css"> </head> <body> <ui-view> <div id="preloader"> <div class="sk-chasing-dots"> <div class="sk-child sk-dot1"></div> <div class="sk-child sk-dot2"></div> </div> </div> </ui-view> <script src="scripts/vendor.99046e76.js"></script> <script src="scripts/scripts.5f24697c.js"></script> <script type="text/javascript">$('body').on('click', '#submit-action', function () {
+            $('.filter-icon').click();
+        });</script> <!--menu toggle js start --> <script type="text/javascript">$('body').on('click', '.menu-toggle', function () {
+            if ($('.inner-wrapper').hasClass('left-sidebar')) {
+                $(".inner-wrapper").removeClass("left-sidebar");
+            } else {
+                $(".inner-wrapper").addClass("left-sidebar");
+            }
+        });</script> <script type="text/javascript">$(document).ready(function () {
+            $('body').on('click', '.open-toggle .nav-main > ul > li:not(:nth-child(1))', function () {
+                $('.inner-wrapper').removeClass("open-toggle");
+            });
+            $('body').on('click', '.left-sidebar #justfortest li:first', function (event) {
+                event.stopPropagation();
+            });
+
+        });</script> <script type="text/javascript">$(document).ready(function () {
+            $('body').on('click', '#openNav', function () {
+                $(".inner-wrapper").toggleClass("open-toggle");
+            });
+        });</script> <script type="text/javascript">$(document).ready(function () {
+            $('body').on('click', '.open-toggle .nav-children > li', function () {
+                $(".inner-wrapper").removeClass("open-toggle");
+            });
+        });</script> <!--menu toggle js end --> </body> </html>

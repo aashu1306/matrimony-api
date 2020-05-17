@@ -1,0 +1,41 @@
+body{margin:40px;}
+
+
+.btn-circle {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  padding: 6px 0;
+  font-size: 12px;
+  line-height: 1.428571429;
+  border-radius: 15px;
+}
+.btn-orange {
+    background-color: #F38A00;
+    border-color: #F38A00;
+    color: #F38A01;
+}
+.btn-blue {
+    background-color: #015075;
+    border-color: #015075;
+    color: #015075;
+}
+.btn-redi {
+    background-color: #AA272f;
+    border-color: #AA272f;
+    color: #AA272f;
+}
+
+.btn-green {
+    background-color: #6b8d00;
+    border-color: #6b8d00;
+    color: #6b8d00;
+}.btn-maroon {
+    background-color: #612141;
+    border-color: #612141;
+    color: #612141;
+}.btn-grey {
+    background-color: #939b9b;
+    border-color: #939b9b;
+    color: #939b9b;
+}
