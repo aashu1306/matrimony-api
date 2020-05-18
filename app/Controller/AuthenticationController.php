@@ -13,9 +13,8 @@ class AuthenticationController extends AppController {
  * @var mixed
  */
 	public function beforeFilter() {
-		
 		parent::beforeFilter();
-		$this->Security->unlockedActions = array('login','process','checkUser','getToken');
+		$this->Security->unlockedActions = array('login','process','checkUser','getToken','checkToken');
 		$host = (env('HTTP_ORIGIN'))?:'http://localhost/';
 		$this->response->header('Access-Control-Allow-Origin', $host);
 		$this->response->header('Access-Control-Allow-Credentials', 'true');
@@ -24,29 +23,31 @@ class AuthenticationController extends AppController {
 	
 	public function login(){
 		$response = $this->process();
-		$this->set(array('response' => $response, '_serialize' => array('response')));
+		$this->set(array('response' => $response, '_serialize' => 'response'));
 	}	
 
 	/* take token and authenticate it. */
 	public function process(){
 		$response = array(
-			'is_error' => false,
-			'error_message' => '',
+			'code' => '',
+			'message' => '',
 			'data' => ''
 		);
 		$access = $this->checkUser($_POST);
-		if ($access['IsError']) {
+		if ($access['code'] != '200') {
+			$this->headerStatus($access['code']);
 			$response = array(
-				'is_error' => true,
-				'error_message' => '',
-				'data' => $access['error_message'],
+				'code' => $access['code'],
+				'message' => $access['message'],
+				'data' => '',
 			);
 		}
-		if (!$access['IsError']) {
+		if ($access['code'] == '200') {
+			$this->headerStatus(200);
 			$response = array(
-				'is_error' => false,
-				'error_message' => '',
-				'data' => array('id' => $access['id'], 'token' => $this->getToken($access['id'])),
+				'code' => $access['code'],
+				'message' => $access['message'],
+				'data' => array('id' => $access['data'], 'token' => $this->getToken($access['data'])),
 			);
 		}
 		return $response;
@@ -58,20 +59,19 @@ class AuthenticationController extends AppController {
 			$userData = $this->User->find('first', array('conditions'=>array('User.username' => $details['Username'], 'User.password' => md5($details['Password']), 'User.status' => 1),'fields'=>array('User.id')));
 			
 			if (count($userData) > 0) {
-				$returnArr['IsError'] = false;
-	       		$returnArr['error_message'] = "";
-	       		$returnArr['id'] = $userData['User']['id'];
+				$returnArr['code'] = '200';
+	       		$returnArr['message'] = 'OK';
+	       		$returnArr['data'] = $userData['User']['id'];
 			}else {
-				$this->headerStatus(401);
-				$returnArr['IsError'] = true;
-	       		$returnArr['error_message'] = "Data not found.";
+				$returnArr['code'] = '401';
+				$returnArr['message'] = 'Unauthorized';
+				$returnArr['data'] = '';
 			}	
 		}else {
-				$this->headerStatus(401);
-				$returnArr['IsError'] = true;
-	       		$returnArr['error_message'] = "Data not found.";
+				$returnArr['code'] = '403';
+				$returnArr['message'] = 'Forbidden';
+				$returnArr['data'] = '';
 			}
-	
 		return $returnArr;
 	}
 
@@ -121,31 +121,10 @@ EOD;
 		
 		$jwt = JWT::encode($token, $privateKey, 'RS256');
 		
-		/* $response = array(
-			'is_error' => false,
-			'error_message' => '',
-			'data' => $jwt
-		); */
 		return $jwt;
 	}
 
-	/* check token
-	public function process(){
-		$response = array(
-			'is_error' => false,
-			'error_message' => '',
-			'data' => ''
-		);
-
-		$access = $this->checkUserDetail($_POST);
-		if ($access['IsError']) {
-			$response = array(
-				'is_error' => true,
-				'error_message' => '',
-				'data' => $access['error_message'],
-			);
-		}
-		
+	public function checkToken(){	
 		$publicKey = <<<EOD
 -----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoIeRzmXp+Njke61JD3vW
@@ -157,29 +136,47 @@ HqVl0mrlCw+6ncwVfU3UJbahPRBuorg4EIBsECGQ5XJIBoHefF9TvGYHEHDNWJfI
 GwIDAQAB
 -----END PUBLIC KEY-----
 EOD;
-
-		$decoded = JWT::decode($_POST['Token'], $publicKey, array('RS256'));
-		
-		$d = new DateTime();
-		$timestamp = $d->getTimestamp();
-
-		if($timestamp > $decoded->exp){
+		if (!isset($_POST['token'])) {
 			$response = array(
-				'is_error' => true,
-				'error_message' => '',
-				'data' => 'Token has expired.',
+			'code' => '403',
+			'message' => 'Forbidden',
+			'data' => ''
 			);
 		}
-		$_POST['decoded'] = $decoded;
-		$checked = $this->checkTypeAndId($_POST);
-		if ($checked['IsError']) {
+		if (isset($_POST['token']) && $_POST['token'] == '') {
 			$response = array(
-				'is_error' => true,
-				'error_message' => '',
-				'data' => 'Invailid Data.',
+			'code' => '403',
+			'message' => 'Forbidden',
+			'data' => ''
 			);
 		}
-
-		return $response;
-	}*/		
+		if (isset($_POST['token']) && $_POST['token'] != '') {
+			$decoded = JWT::decode($_POST['token'], $publicKey, array('RS256'));
+			$userData = $this->User->find('first', array('conditions'=>array('User.id' => $decoded->data->userId, 'User.status' => 1),'fields'=>array('User.id')));
+			if (isset($_POST['token']) && ($_POST['token'] != '') && !count($userData) > 0) {
+				$response = array(
+				'code' => '401',
+				'message' => 'Unauthorized',
+				'data' => ''
+				);
+			}
+			$d = new DateTime();
+			$timestamp = $d->getTimestamp();
+			if(isset($_POST['token']) && ($_POST['token'] != '') && ($timestamp > $decoded->exp)){
+				$response = array(
+					'code' => '401',
+					'message' => 'Token has expired.',
+					'data' => '',
+				);
+			}
+			if(isset($_POST['token']) && ($_POST['token'] != '') && !($timestamp > $decoded->exp) && (count($userData) > 0)){
+				$response = array(
+					'code' => '200',
+					'message' => 'OK',
+					'data' => array('id' => $decoded->data->userId, 'token' => $_POST['token']),
+				);
+			}
+		}
+		$this->set(array('response' => $response, '_serialize' => 'response'));
+	}		
 }
