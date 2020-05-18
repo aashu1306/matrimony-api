@@ -66,7 +66,7 @@ class AppController extends Controller {
 	11 = 'Login Fail';
 	12 = 'Confirm';*/
 	
-	public function logEntry($description=null, $actionId=null, $companyId=null){
+	/* function logEntry($description=null, $actionId=null, $companyId=null){
 		$userId = $this->Session->read('User.id');
 
 		$clientIpAddress = $this->getRealIpAddr(false);
@@ -82,9 +82,9 @@ class AppController extends Controller {
 		$description = addslashes($description);
 		$this->{$this->uses[0]}->query("INSERT INTO logs(description,action,date,user_id,company_id,ip,ip_address) VALUES ('{$description}',{$actionId},'{$completeDate}',{$userId},{$companyId},INET_ATON('".$_SERVER['REMOTE_ADDR']."'),'{$clientIpAddress}')");
 		return true;      
-	}
+	} */
 
-	public function getLastQuery($model) {
+	function getLastQuery($model) {
 		
 	    $dbo = $model->getDatasource();
 	    $logData = $dbo->getLog();

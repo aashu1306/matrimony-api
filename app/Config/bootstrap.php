@@ -109,6 +109,4 @@ CakeLog::config('error', array(
 	'types' => array('warning', 'error', 'critical', 'alert', 'emergency'),
 	'file' => 'error',
 ));
-
-#@16/10/2015 by Vishal, include custom config
 Configure::load('msh_config');

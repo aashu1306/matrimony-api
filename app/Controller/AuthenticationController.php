@@ -2,26 +2,32 @@
 App::uses('AppController', 'Controller');
 use \Firebase\JWT\JWT;
 /**
- * AuthencateToken Controller
+ * Authentication Controller
  */
 class AuthenticationController extends AppController {
-	var $uses = array();
-
+	var $name = 'Authentication';
+	var $uses = array('User');
 /**
  * Scaffold
  *
  * @var mixed
  */
 	public function beforeFilter() {
+		
 		parent::beforeFilter();
-		$this->Security->unlockedActions = array('process','checkUserDetail','checkTypeAndId','checkValidData','checkValidMapData');
+		$this->Security->unlockedActions = array('login','process','checkUser','getToken');
 		$host = (env('HTTP_ORIGIN'))?:'http://localhost/';
 		$this->response->header('Access-Control-Allow-Origin', $host);
 		$this->response->header('Access-Control-Allow-Credentials', 'true');
 		$this->url = Router::url('/',true);
 	}
 	
-/* take token and authenticate it. */
+	public function login(){
+		$response = $this->process();
+		$this->set(array('response' => $response, '_serialize' => array('response')));
+	}	
+
+	/* take token and authenticate it. */
 	public function process(){
 		$response = array(
 			'is_error' => false,
@@ -40,16 +46,17 @@ class AuthenticationController extends AppController {
 			$response = array(
 				'is_error' => false,
 				'error_message' => '',
-				'data' => arraay('id' => $access['id'], 'token' => $this->getToken($access['id'])),
+				'data' => array('id' => $access['id'], 'token' => $this->getToken($access['id'])),
 			);
 		}
+		return $response;
 	}
 
 	public function checkUser($details){
 		$returnArr =array();
 		if (!empty($details['Username']) && !empty($details['Password'])) {
-			$userData = $this->User->find('first', array('conditions'=>array('User.email' => $_POST['Username'], 'User.pword' => md5($_POST['Password']), 'User.active' => 1),'fields'=>array('User.id','User.email')));
-
+			$userData = $this->User->find('first', array('conditions'=>array('User.email' => $details['Username'], 'User.pword' => md5($details['Password']), 'User.active' => 1),'fields'=>array('User.id','User.email')));
+			
 			if (count($userData) > 0) {
 				$returnArr['IsError'] = false;
 	       		$returnArr['error_message'] = "";
@@ -103,7 +110,7 @@ EOD;
 		$timestamp = $d->getTimestamp();
 		
 		$token = array(
-			"iss" => "https://".$_SERVER[HTTP_HOST]."/",
+			"iss" => "https://".$_SERVER['HTTP_HOST']."/",
 			"iat" => $timestamp,
 			"nbf" => $timestamp,
 			"exp"  => $timestamp + (20 * 60),
@@ -111,13 +118,15 @@ EOD;
 				'userId'   => $id,
 			]
 		);
+		
 		$jwt = JWT::encode($token, $privateKey, 'RS256');
-		$response = array(
+		
+		/* $response = array(
 			'is_error' => false,
 			'error_message' => '',
 			'data' => $jwt
-		);
-		$this->set(array('response' => $response, '_serialize' => array('response')));
+		); */
+		return $jwt;
 	}
 
 	/* check token
@@ -172,5 +181,5 @@ EOD;
 		}
 
 		return $response;
-	}*/
+	}*/		
 }
