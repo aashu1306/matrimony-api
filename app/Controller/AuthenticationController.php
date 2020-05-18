@@ -55,7 +55,7 @@ class AuthenticationController extends AppController {
 	public function checkUser($details){
 		$returnArr =array();
 		if (!empty($details['Username']) && !empty($details['Password'])) {
-			$userData = $this->User->find('first', array('conditions'=>array('User.email' => $details['Username'], 'User.pword' => md5($details['Password']), 'User.active' => 1),'fields'=>array('User.id','User.email')));
+			$userData = $this->User->find('first', array('conditions'=>array('User.username' => $details['Username'], 'User.password' => md5($details['Password']), 'User.status' => 1),'fields'=>array('User.id')));
 			
 			if (count($userData) > 0) {
 				$returnArr['IsError'] = false;
