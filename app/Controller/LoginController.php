@@ -1,9 +1,9 @@
 <?php
 App::uses('AppController', 'Controller');
 /**
- * TestOrchestration Controller
+ * Login Controller
  */
-class TestOrchestrationController extends AppController {
+class LoginController extends AppController {
 	var $uses = array();
 
 /**
@@ -13,27 +13,19 @@ class TestOrchestrationController extends AppController {
  */
 	public function beforeFilter() {
 		parent::beforeFilter();
-		$this->Security->unlockedActions = array('testwordcloud');
-
+		$this->Security->unlockedActions = array('login');
 		$host = (env('HTTP_ORIGIN'))?:'http://localhost/';
 		$this->response->header('Access-Control-Allow-Origin', $host);
 		$this->response->header('Access-Control-Allow-Credentials', 'true');
-
 		$this->url = Router::url('/',true);
 	}
-
-	public function testwordcloud($redirectClass){
-		
+	
+	public function login(){
 		$redirectClass = ucfirst($redirectClass);
-
-		App::import('Controller', $redirectClass);
-
-		$newClass = $redirectClass.'Controller';
-		
+		App::import('Controller', 'Authentication');
+		$newClass = 'AuthenticationController';		
 		$redirectClassController = new $newClass;
-		
-		$response = $redirectClassController->test();
-
+		$response = $redirectClassController->process();
 		$this->set(array('response' => $response, '_serialize' => array('response')));
-	}		
+	}			
 }
