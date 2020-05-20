@@ -30,8 +30,9 @@ class UsersController extends AppController {
 		$userData = $this->User->find('first',array('conditions'=>array('User.id' => $_POST['userId'])));
 		$otp = $this->randomPassword(4);
 		if ($flag == true) {
-			$this->User->id = $userData['User']['id'];
-			$this->User->saveField('otp', $otp);
+			//$this->User->id = $userData['User']['id'];
+			//$this->User->saveField('otp', $otp);
+			$this->User->updateAll(array('User.otp' => $otp, 'User.modified' => $today), array('User.id' => $_POST['userId']));
 			$name = $userData['User']['fname'].' '.$userData['User']['lname'];
 			$returnArray = $this->sendOtpMail($userData['User']['email'], $name, $otp);
 			if ($returnArray['send'] == '1') {
