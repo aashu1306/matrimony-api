@@ -10,12 +10,47 @@ class UsersController extends AppController {
 	var $uses = array('User');
 	public function beforeFilter() {
 		parent::beforeFilter();
-		$this->Security->unlockedActions = array('register', 'updateOtp');
+		$this->Security->unlockedActions = array('register', 'updateOtp', 'resendOtp', 'sendOtpMail', 'randomPassword');
 		$host = (env('HTTP_ORIGIN'))?:'http://localhost/';
 		$this->response->header('Access-Control-Allow-Origin', $host);
 		$this->response->header('Access-Control-Allow-Credentials', 'true');
 	}
 
+	public function resendOtp(){
+		$flag = true;
+		if (empty($_POST['userId'])) {
+			$flag = false;
+			$response = array(
+				'code' => '200',
+				'message' => 'Data Empty.',
+				'data' => ''
+			);
+		}
+		$today = date('Y-m-d H:i:s');
+		$userData = $this->User->find('first',array('conditions'=>array('User.id' => $_POST['userId'])));
+		$otp = $this->randomPassword(4);
+		if ($flag == true) {
+			$this->User->id = $userData['User']['id'];
+			$this->User->saveField('otp', $otp);
+			$name = $userData['User']['fname'].' '.$userData['User']['lname'];
+			$returnArray = $this->sendOtpMail($userData['User']['email'], $name, $otp);
+			if ($returnArray['send'] == '1') {
+				$response = array(
+					'code' => '200',
+					'message' => 'One time password sended to email.',
+					'data' => $userData['User']['id']
+				);
+			}
+			if ($returnArray['send'] == '2') {
+				$response = array(
+					'code' => '200',
+					'message' => $returnArray['msg'],
+					'data' => ''
+				);
+			}
+		}
+		$this->set(array('response' => $response, '_serialize' => 'response'));
+	}
 	public function updateOtp(){
 		$flag = true;
 		if (empty($_POST['otp'])) {
@@ -280,13 +315,13 @@ class UsersController extends AppController {
 			$Mail->Subject = $subject;
 			$Mail->AddAddress($email, $name);
 			$Mail->Body = $content;
-			//if($Mail->send()){
+			if($Mail->send()){
 				$returnArray['send'] = '1';
 				$returnArray['msg'] = '';
-			/*}else{
+			}else{
 				$returnArray['send'] = '2';
 				$returnArray['msg'] = $Mail->ErrorInfo;
-			}*/
+			}
 		return $returnArray;
 	}
 
