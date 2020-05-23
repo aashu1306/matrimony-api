@@ -21,7 +21,7 @@ class UsersController extends AppController {
 		if (empty($_POST['userId'])) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '404',
 				'message' => 'Data Empty.',
 				'data' => ''
 			);
@@ -30,8 +30,6 @@ class UsersController extends AppController {
 		$userData = $this->User->find('first',array('conditions'=>array('User.id' => $_POST['userId'])));
 		$otp = $this->randomPassword(4);
 		if ($flag == true) {
-			//$this->User->id = $userData['User']['id'];
-			//$this->User->saveField('otp', $otp);
 			$this->User->updateAll(array('User.otp' => $otp, 'User.modified' => $today), array('User.id' => $_POST['userId']));
 			$name = $userData['User']['fname'].' '.$userData['User']['lname'];
 			$returnArray = $this->sendOtpMail($userData['User']['email'], $name, $otp);
@@ -44,7 +42,7 @@ class UsersController extends AppController {
 			}
 			if ($returnArray['send'] == '2') {
 				$response = array(
-					'code' => '200',
+					'code' => '403',
 					'message' => $returnArray['msg'],
 					'data' => ''
 				);
@@ -57,7 +55,7 @@ class UsersController extends AppController {
 		if (empty($_POST['otp'])) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '404',
 				'message' => 'Data Empty.',
 				'data' => ''
 			);
@@ -72,7 +70,7 @@ class UsersController extends AppController {
 		if ($diff > 10) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '401',
 				'message' => 'One time Password has expired.',
 				'data' => ''
 			);
@@ -80,18 +78,22 @@ class UsersController extends AppController {
 		if ($_POST['otp'] != $userData['User']['otp']) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '403',
 				'message' => 'One time password is wrong.',
 				'data' => ''
 			);
 		}
 		if ($flag == true) {
-			$this->User->id = $userData['User']['id'];
-			$this->User->saveField('status', '1');
+			$this->User->updateAll(array('User.status' => 1, 'User.email_verified' => 1), array('User.id' => $userData['User']['id']));
+			$userData = $this->User->find('first', array('conditions'=>array('User.id' => $userData['User']['id'])));
+			App::import('Controller', 'Authentication');
+			$auth = 'AuthenticationController';		
+			$authController = new $auth;		
+			$userData['User']['token'] = $authController->getToken($userData['User']['id']);
 			$response = array(
 				'code' => '200',
 				'message' => 'User created success.',
-				'data' => ''
+				'data' => $userData
 			);
 		}
 		$this->set(array('response' => $response, '_serialize' => 'response'));

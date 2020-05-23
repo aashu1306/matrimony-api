@@ -44,10 +44,12 @@ class AuthenticationController extends AppController {
 		}
 		if ($access['code'] == '200') {
 			$this->headerStatus(200);
+			$userData = $this->User->find('first', array('conditions'=>array('User.id' => $access['data'])));
+			$userData['User']['token'] = $this->getToken($access['data']);
 			$response = array(
 				'code' => $access['code'],
 				'message' => $access['message'],
-				'data' => array('id' => $access['data'], 'token' => $this->getToken($access['data'])),
+				'data' => $userData
 			);
 		}
 		return $response;
@@ -68,8 +70,8 @@ class AuthenticationController extends AppController {
 				$returnArr['data'] = '';
 			}	
 		}else {
-				$returnArr['code'] = '403';
-				$returnArr['message'] = 'Forbidden';
+				$returnArr['code'] = '404';
+				$returnArr['message'] = 'Not Found.';
 				$returnArr['data'] = '';
 			}
 		return $returnArr;
