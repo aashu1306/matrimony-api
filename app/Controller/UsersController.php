@@ -104,7 +104,7 @@ class UsersController extends AppController {
 		if (empty($_POST)) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '500',
 				'message' => 'Data Empty.',
 				'data' => ''
 			);
@@ -112,7 +112,7 @@ class UsersController extends AppController {
 		if (empty($_POST['fname'])) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '500',
 				'message' => 'First Name Empty.',
 				'data' => ''
 			);
@@ -120,7 +120,7 @@ class UsersController extends AppController {
 		if (empty($_POST['lname'])) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '500',
 				'message' => 'Last Name Empty.',
 				'data' => ''
 			);
@@ -128,7 +128,7 @@ class UsersController extends AppController {
 		if (empty($_POST['gender'])) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '500',
 				'message' => 'Gender Empty.',
 				'data' => ''
 			);
@@ -136,7 +136,7 @@ class UsersController extends AppController {
 		if (empty($_POST['genderinterest'])) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '500',
 				'message' => 'Gender Interest Empty.',
 				'data' => ''
 			);
@@ -144,7 +144,7 @@ class UsersController extends AppController {
 		if (empty($_POST['dateofbirth'])) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '500',
 				'message' => 'Date of Birth Empty.',
 				'data' => ''
 			);
@@ -152,7 +152,7 @@ class UsersController extends AppController {
 		if (empty($_POST['religion'])) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '500',
 				'message' => 'Religion Empty.',
 				'data' => ''
 			);
@@ -160,7 +160,7 @@ class UsersController extends AppController {
 		if (empty($_POST['education'])) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '500',
 				'message' => 'Education Empty.',
 				'data' => ''
 			);
@@ -168,7 +168,7 @@ class UsersController extends AppController {
 		if (empty($_POST['username'])) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '500',
 				'message' => 'Username Empty.',
 				'data' => ''
 			);
@@ -176,7 +176,7 @@ class UsersController extends AppController {
 		if (empty($_POST['password'])) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '500',
 				'message' => 'Password Empty.',
 				'data' => ''
 			);
@@ -184,7 +184,7 @@ class UsersController extends AppController {
 		if (empty($_POST['country'])) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '500',
 				'message' => 'Country Empty.',
 				'data' => ''
 			);
@@ -192,7 +192,7 @@ class UsersController extends AppController {
 		if (empty($_POST['mobile'])) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '500',
 				'message' => 'Mobile Empty.',
 				'data' => ''
 			);
@@ -200,7 +200,7 @@ class UsersController extends AppController {
 		if (empty($_POST['email'])) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '500',
 				'message' => 'Email Empty.',
 				'data' => ''
 			);
@@ -211,7 +211,7 @@ class UsersController extends AppController {
 		if (in_array($_POST['email'], $emailData)) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '500',
 				'message' => 'Email Duplicate.',
 				'data' => ''
 			);
@@ -219,7 +219,7 @@ class UsersController extends AppController {
 		if (in_array($_POST['mobile'], $mobileData)) {
 			$flag = false;
 			$response = array(
-				'code' => '200',
+				'code' => '500',
 				'message' => 'Mobile Duplicate.',
 				'data' => ''
 			);
@@ -249,7 +249,7 @@ class UsersController extends AppController {
 			if (!$this->User->save($userData['User'],false,array('fname','lname','email','mobile','password','country','username','education','religion','dateofbirth','genderinterest','gender','created','modified','otp'))) {
 				$flag = false;
 				$response = array(
-					'code' => '200',
+					'code' => '500',
 					'message' => 'User not created.',
 					'data' => ''
 				);
@@ -272,7 +272,7 @@ class UsersController extends AppController {
 				if ($returnArray['send'] == '2') {
 					$transaction->rollback();
 					$response = array(
-						'code' => '200',
+						'code' => '500',
 						'message' => $returnArray['msg'],
 						'data' => ''
 					);
