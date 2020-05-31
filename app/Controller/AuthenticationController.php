@@ -122,7 +122,6 @@ EOD;
 		);
 		
 		$jwt = JWT::encode($token, $privateKey, 'RS256');
-		
 		return $jwt;
 	}
 

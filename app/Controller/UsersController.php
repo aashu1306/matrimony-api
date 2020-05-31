@@ -1,6 +1,6 @@
 <?php
 App::uses('AppController', 'Controller');
-
+use \Firebase\JWT\JWT;
 /**
  * Users Controller
  */
@@ -10,7 +10,7 @@ class UsersController extends AppController {
 	var $uses = array('User');
 	public function beforeFilter() {
 		parent::beforeFilter();
-		$this->Security->unlockedActions = array('register', 'updateOtp', 'resendOtp', 'sendOtpMail', 'randomPassword');
+		$this->Security->unlockedActions = array('register', 'updateOtp', 'resendOtp', 'sendOtpMail', 'randomPassword','getToken');
 		$host = (env('HTTP_ORIGIN'))?:'http://localhost/';
 		$this->response->header('Access-Control-Allow-Origin', $host);
 		$this->response->header('Access-Control-Allow-Credentials', 'true');
@@ -30,14 +30,14 @@ class UsersController extends AppController {
 		$userData = $this->User->find('first',array('conditions'=>array('User.id' => $_POST['userId'])));
 		$otp = $this->randomPassword(4);
 		if ($flag == true) {
-			$this->User->updateAll(array('User.otp' => $otp, 'User.modified' => $today), array('User.id' => $_POST['userId']));
+			$this->User->updateAll(array('User.otp' => $otp, 'User.modified' => "'".$today."'"), array('User.id' => $_POST['userId']));
 			$name = $userData['User']['fname'].' '.$userData['User']['lname'];
 			$returnArray = $this->sendOtpMail($userData['User']['email'], $name, $otp);
 			if ($returnArray['send'] == '1') {
 				$response = array(
 					'code' => '200',
 					'message' => 'One time password sended to email.',
-					'data' => $userData['User']['id']
+					'data' => array('id' => $userData['User']['id'])
 				);
 			}
 			if ($returnArray['send'] == '2') {
@@ -55,7 +55,7 @@ class UsersController extends AppController {
 		if (empty($_POST['otp'])) {
 			$flag = false;
 			$response = array(
-				'code' => '404',
+				'code' => '500',
 				'message' => 'Data Empty.',
 				'data' => ''
 			);
@@ -83,6 +83,7 @@ class UsersController extends AppController {
 				'data' => ''
 			);
 		}
+
 		if ($flag == true) {
 			$this->User->updateAll(array('User.status' => 1, 'User.email_verified' => 1), array('User.id' => $userData['User']['id']));
 			$userData = $this->User->find('first', array('conditions'=>array('User.id' => $userData['User']['id'])));
@@ -261,12 +262,13 @@ class UsersController extends AppController {
 				$lastId = $this->User->getLastInsertId();
 				$name = $_POST['fname'].' '.$_POST['lname'];
 				$returnArray = $this->sendOtpMail($_POST['email'], $name, $otp);
+				$data = array('id' => $lastId);
 				if ($returnArray['send'] == '1') {
 					$transaction->commit();
 					$response = array(
 						'code' => '200',
 						'message' => 'One time password sended to email.',
-						'data' => $lastId
+						'data' => $data
 					);
 				}
 				if ($returnArray['send'] == '2') {
@@ -279,7 +281,7 @@ class UsersController extends AppController {
 				}
 			}
 		}
-		$this->set(array('response' => $response, '_serialize' => 'response'));
+		$this->set(array('response' => $response, '_serialize' => 'response')); 
 	}
 
 	public function sendOtpMail($email, $name, $otp) { 		
